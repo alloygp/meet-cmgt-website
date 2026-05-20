@@ -167,7 +167,7 @@ export default async function handler(req, res) {
           <p style="margin:0 0 24px;font-size:15px;line-height:1.6;color:#333;">
             No pitch, no pressure — promise. In the meantime, if you have any questions
             you can reply directly to this email or call us at
-            <a href="tel:5045551234" style="color:#1E1E77;">(504) 555-1234</a>.
+            <a href="tel:2255032648" style="color:#1E1E77;">(225) 503-2648</a>.
           </p>
           <div style="border-top:1px solid #eee;padding-top:20px;margin-top:8px;">
             <p style="margin:0;font-size:13px;color:#999;">
