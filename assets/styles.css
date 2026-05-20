@@ -1,8 +1,66 @@
 /* ─────────────────────────────────────────────────────────────────
    Meet CMGT landing — styles (tokens + page-specific)
-   Adobe Fonts kit (Gelica) + Google Fonts (DM Sans, Fraunces fallback)
+   Self-hosted Gelica (Hubert Jocham Type) + Google Fonts (DM Sans + Fraunces fallback)
    ───────────────────────────────────────────────────────────────── */
-@import url("https://use.typekit.net/scd2anz.css");
+
+/* ── Self-hosted Gelica ─────────────────────────────────────────── */
+@font-face {
+  font-family: 'Gelica';
+  font-weight: 200;
+  font-style: normal;
+  font-display: swap;
+  src: url('fonts/gelica-extra-light.otf') format('opentype');
+}
+@font-face {
+  font-family: 'Gelica';
+  font-weight: 300;
+  font-style: normal;
+  font-display: swap;
+  src: url('fonts/gelica-light.otf') format('opentype');
+}
+@font-face {
+  font-family: 'Gelica';
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+  src: url('fonts/gelica-regular.otf') format('opentype');
+}
+@font-face {
+  font-family: 'Gelica';
+  font-weight: 400;
+  font-style: italic;
+  font-display: swap;
+  src: url('fonts/gelica-italic.otf') format('opentype');
+}
+@font-face {
+  font-family: 'Gelica';
+  font-weight: 500;
+  font-style: normal;
+  font-display: swap;
+  src: url('fonts/gelica-medium.otf') format('opentype');
+}
+@font-face {
+  font-family: 'Gelica';
+  font-weight: 600;
+  font-style: normal;
+  font-display: swap;
+  src: url('fonts/gelica-semibold.otf') format('opentype');
+}
+@font-face {
+  font-family: 'Gelica';
+  font-weight: 700;
+  font-style: normal;
+  font-display: swap;
+  src: url('fonts/gelica-bold.otf') format('opentype');
+}
+@font-face {
+  font-family: 'Gelica';
+  font-weight: 900;
+  font-style: normal;
+  font-display: swap;
+  src: url('fonts/gelica-black.otf') format('opentype');
+}
+
 @import url("https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600;9..144,700;9..144,800&family=DM+Sans:ital,wght@0,400;0,500;0,600;0,700;1,400;1,500&display=swap");
 
 :root {
@@ -18,7 +76,7 @@
   --hairline: #EEEEEE;
   --hairline-strong: #DDDDDD;
 
-  --font-display: "gelica-light-italic", "Fraunces", Georgia, serif;
+  --font-display: "Gelica", "Fraunces", Georgia, serif;
   --font-body: "DM Sans", system-ui, -apple-system, "Segoe UI", sans-serif;
 
   --ease-out: cubic-bezier(0.22, 1, 0.36, 1);

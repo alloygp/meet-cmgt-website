@@ -90,11 +90,9 @@ Then in Vercel → **Settings → Domains** → add `meet.cmgt.org`.
 
 ### 6. Authorize the domain in Adobe Fonts
 
-The Gelica font is loaded via your Adobe Fonts kit (`scd2anz`). Go to:
+~~The Gelica font is loaded via your Adobe Fonts kit~~ — **no longer needed.** Gelica is now self-hosted from `assets/fonts/`, so the font loads regardless of domain.
 
-> fonts.adobe.com → My Adobe Fonts → Web Projects → **scd2anz** → Domains
-
-…and add `meet.cmgt.org`. Otherwise the page will fall back to Fraunces (the serif you see when previewing from `file://`).
+> **License reminder:** make sure your Gelica license permits self-hosted web use (Hubert Jocham Type / MyFonts "Webfont" license). The Adobe Fonts subscription only covers Adobe-served delivery.
 
 ---
 
