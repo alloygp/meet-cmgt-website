@@ -33,7 +33,7 @@
   <!-- HEADER ─────────────────────────────────────────────────────── -->
   <header class="slim-header">
     <div class="container">
-      <a href="/" class="brand" aria-label="CMGT home">
+      <a href="https://cmgt.org" class="brand" aria-label="CMGT home">
         <img src="assets/logo-1C-white.svg" alt="CMGT">
       </a>
       <a href="tel:5045551234" class="phone">
@@ -62,16 +62,16 @@
 
       <div class="meet-stats">
         <div>
-          <div class="meet-stat-num">19</div>
+          <div class="meet-stat-num" data-count-to="19" data-duration="1400">0</div>
           <div class="meet-stat-label">years in Louisiana</div>
         </div>
         <div>
-          <div class="meet-stat-num">96%</div>
+          <div class="meet-stat-num" data-count-to="96" data-suffix="%" data-duration="1600">0%</div>
           <div class="meet-stat-label">client retention</div>
         </div>
         <div class="meet-scan">
           <a href="#say-hi">
-            <div class="meet-scan-label">Let's have a conversation →</div>
+            <div class="meet-scan-label">Let's have a conversation <span class="arrow">↓</span></div>
             <div class="meet-scan-sub">Scroll down to say hi</div>
           </a>
         </div>
@@ -124,33 +124,42 @@
   <!-- PROOF ────────────────────────────────────────────────────── -->
   <section class="proof">
     <div class="container">
-      <div class="proof-row">
-        <div>
-          <p class="proof-q">
-            Switching to CMGT was the single best decision our board made last year. Our owners actually get answers now.
-          </p>
-          <div class="proof-cite">
-            <strong>Linda M.</strong>
-            Board President · 142-unit condo, Metairie
-          </div>
+      <div class="proof-headline">
+        <div class="proof-eyebrow">By the numbers</div>
+        <h2 class="proof-h">
+          The largest HOA management company in the Gulf South —
+          and the only one that's stayed independent.
+        </h2>
+        <p class="proof-sub">
+          <strong>#1 in Louisiana since 2014.</strong> <strong>#1 on the Mississippi Gulf Coast since 2021.</strong>
+          100% organic growth since 2007 — every community won through sales, referrals, and reputation. No PE, no acquisitions, no outside investors.
+        </p>
+      </div>
+
+      <div class="proof-grid-6">
+        <div class="proof-stat">
+          <div class="proof-stat-num" data-count-to="400" data-suffix="+" data-duration="1500">0+</div>
+          <div class="proof-stat-label">community associations managed</div>
         </div>
-        <div class="proof-stats">
-          <div class="proof-stat">
-            <div class="proof-stat-num">375+</div>
-            <div class="proof-stat-label">associations managed across the Gulf South</div>
-          </div>
-          <div class="proof-stat">
-            <div class="proof-stat-num">46k+</div>
-            <div class="proof-stat-label">doors under management</div>
-          </div>
-          <div class="proof-stat">
-            <div class="proof-stat-num">&lt;24h</div>
-            <div class="proof-stat-label">average response time on owner inquiries</div>
-          </div>
-          <div class="proof-stat">
-            <div class="proof-stat-num" style="font-size:28px;">LA · MS · AL · TX</div>
-            <div class="proof-stat-label" style="margin-top:6px;">Gulf South footprint</div>
-          </div>
+        <div class="proof-stat">
+          <div class="proof-stat-num" data-count-to="60" data-suffix="k+" data-duration="1300">0k+</div>
+          <div class="proof-stat-label">homes under management</div>
+        </div>
+        <div class="proof-stat">
+          <div class="proof-stat-num" data-count-to="5" data-duration="900">0</div>
+          <div class="proof-stat-label">states served across the Gulf South</div>
+        </div>
+        <div class="proof-stat">
+          <div class="proof-stat-num" data-count-to="24" data-prefix="&lt;" data-suffix="h" data-duration="1200">&lt;0h</div>
+          <div class="proof-stat-label">average response time on owner inquiries</div>
+        </div>
+        <div class="proof-stat">
+          <div class="proof-stat-num" data-count-to="100" data-suffix="%" data-duration="1400">0%</div>
+          <div class="proof-stat-label">organic growth — no acquisitions, no PE backing</div>
+        </div>
+        <div class="proof-stat">
+          <div class="proof-stat-num" data-count-to="2007" data-duration="1800">0</div>
+          <div class="proof-stat-label">founded in Denham Springs, LA. Independently owned ever since.</div>
         </div>
       </div>
     </div>
@@ -176,12 +185,12 @@
             <span>(504) 555-1234 · Mon–Fri, 8a–5p CT</span>
           </div>
           <div class="form-side-meta-row">
-            <span class="form-side-meta-k">Email</span>
-            <span>hello@cmgt.org</span>
+            <span class="form-side-meta-k">Markets</span>
+            <span>Louisiana · Mississippi · Alabama · Florida · Texas</span>
           </div>
           <div class="form-side-meta-row">
-            <span class="form-side-meta-k">Visit</span>
-            <span>New Orleans · Baton Rouge · Mobile · Houston</span>
+            <span class="form-side-meta-k">HQ</span>
+            <span>Denham Springs, LA · by appointment</span>
           </div>
         </div>
       </div>
@@ -250,7 +259,7 @@
   <footer class="slim-footer">
     <div class="container">
       <div class="ft-brand">
-        <img src="assets/logo-1C-white.svg" alt="CMGT">
+        <a href="https://cmgt.org" aria-label="CMGT home"><img src="assets/logo-1C-white.svg" alt="CMGT"></a>
         <span class="copy">© <span id="yr"></span> CMGT, Inc.</span>
       </div>
       <span class="tagline">Commit. Communicate. Care.</span>
@@ -261,6 +270,49 @@
   <script>
     document.getElementById('yr').textContent = new Date().getFullYear();
 
+    /* ── Count-up animation on scroll-into-view ─────────────────── */
+    (function () {
+      const prefersReduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+      const targets = document.querySelectorAll('[data-count-to]');
+      if (!targets.length) return;
+
+      // easeOutCubic — fast start, gentle finish
+      const ease = (t) => 1 - Math.pow(1 - t, 3);
+
+      function animateTo(el) {
+        const target = parseFloat(el.dataset.countTo) || 0;
+        const duration = parseInt(el.dataset.duration, 10) || 1500;
+        const prefix = el.dataset.prefix || '';
+        const suffix = el.dataset.suffix || '';
+        if (prefersReduced) {
+          el.textContent = prefix + target + suffix;
+          return;
+        }
+        const start = performance.now();
+        function step(now) {
+          const elapsed = now - start;
+          const t = Math.min(elapsed / duration, 1);
+          const value = Math.round(target * ease(t));
+          el.textContent = prefix + value + suffix;
+          if (t < 1) requestAnimationFrame(step);
+          else el.textContent = prefix + target + suffix;
+        }
+        requestAnimationFrame(step);
+      }
+
+      const io = new IntersectionObserver((entries) => {
+        entries.forEach((entry) => {
+          if (entry.isIntersecting) {
+            animateTo(entry.target);
+            io.unobserve(entry.target);
+          }
+        });
+      }, { threshold: 0.4 });
+
+      targets.forEach((el) => io.observe(el));
+    })();
+
+    /* ── Form submit ────────────────────────────────────────────── */
     const form = document.getElementById('meet-form');
     const success = document.getElementById('meet-form-success');
     const errorEl = document.getElementById('f-error');
