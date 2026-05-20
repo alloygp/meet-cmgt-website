@@ -100,6 +100,44 @@ export default async function handler(req, res) {
       return res.status(502).json({ error: 'Email service rejected the request.' });
     }
 
+    // Send confirmation email to the submitter.
+    await resend.emails.send({
+      from: process.env.LEADS_FROM_EMAIL || 'CMGT <notifications@cmgt.org>',
+      to:   [email],
+      replyTo: process.env.LEADS_TO_EMAIL || 'contact@cmgt.org',
+      subject: `We got your message, ${name.split(' ')[0]} — talk soon.`,
+      html: `
+        <div style="font-family:-apple-system,BlinkMacSystemFont,sans-serif;color:#1E1E77;max-width:560px;">
+          <img src="https://meet.cmgt.org/assets/logo-full-color.svg" alt="CMGT" style="height:36px;margin-bottom:28px;">
+          <h2 style="margin:0 0 12px;font-size:22px;color:#1E1E77;">Thanks — talk soon.</h2>
+          <p style="margin:0 0 16px;font-size:15px;line-height:1.6;color:#333;">
+            Hi ${esc(name.split(' ')[0])}, we got your message and one of our Community Association Managers
+            will reach out within one business day.
+          </p>
+          <p style="margin:0 0 24px;font-size:15px;line-height:1.6;color:#333;">
+            No pitch, no pressure — promise. In the meantime, if you have any questions
+            you can reply directly to this email or call us at
+            <a href="tel:5045551234" style="color:#1E1E77;">(504) 555-1234</a>.
+          </p>
+          <div style="border-top:1px solid #eee;padding-top:20px;margin-top:8px;">
+            <p style="margin:0;font-size:13px;color:#999;">
+              CMGT · Denham Springs, LA · <a href="https://cmgt.org" style="color:#999;">cmgt.org</a>
+            </p>
+            <p style="margin:6px 0 0;font-size:12px;color:#bbb;">Commit. Communicate. Care.</p>
+          </div>
+        </div>
+      `,
+      text: [
+        `Thanks — talk soon.`,
+        ``,
+        `Hi ${name.split(' ')[0]}, we got your message and one of our Community Association Managers will reach out within one business day.`,
+        ``,
+        `No pitch, no pressure — promise. If you have any questions, reply to this email or call us at (504) 555-1234.`,
+        ``,
+        `CMGT · cmgt.org · Commit. Communicate. Care.`,
+      ].join('\n'),
+    });
+
     return res.status(200).json({ ok: true, id: result.data?.id });
   } catch (err) {
     console.error('[send-meet-form] unexpected error:', err);
