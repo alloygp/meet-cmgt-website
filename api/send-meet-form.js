@@ -7,8 +7,55 @@
 //   LEADS_FROM_EMAIL    — verified sender on Resend, e.g. "CMGT Landing <hello@cmgt.org>"
 
 import { Resend } from 'resend';
+import crypto from 'crypto';
 
 const resend = new Resend(process.env.RESEND_API_KEY);
+
+// Subscribes an email to a Mailchimp list. Silently logs on failure so a
+// Mailchimp hiccup never breaks the form submission for the user.
+async function subscribeToMailchimp({ email, name, role, org }) {
+  const apiKey  = process.env.MAILCHIMP_API_KEY;
+  const listId  = process.env.MAILCHIMP_LIST_ID;
+  if (!apiKey || !listId) return;
+
+  // Mailchimp datacenter is the suffix after the last hyphen in the API key.
+  const dc = apiKey.split('-').pop();
+  const emailHash = crypto.createHash('md5').update(email.toLowerCase()).digest('hex');
+  const url = `https://${dc}.api.mailchimp.com/3.0/lists/${listId}/members/${emailHash}`;
+
+  const [firstName, ...rest] = (name || '').trim().split(' ');
+  const lastName = rest.join(' ');
+
+  const payload = {
+    email_address: email,
+    status_if_new: 'subscribed',   // only subscribes if not already on the list
+    status: 'subscribed',
+    merge_fields: {
+      FNAME: firstName || '',
+      LNAME: lastName  || '',
+      ...(role ? { ROLE: role } : {}),
+      ...(org  ? { COMPANY: org } : {}),
+    },
+    tags: ['meet-cmgt-landing'],
+  };
+
+  try {
+    const res = await fetch(url, {
+      method: 'PUT',                // PUT = upsert (add or update)
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Basic ${Buffer.from(`anystring:${apiKey}`).toString('base64')}`,
+      },
+      body: JSON.stringify(payload),
+    });
+    if (!res.ok) {
+      const err = await res.json().catch(() => ({}));
+      console.error('[mailchimp] subscribe error:', err?.detail || err);
+    }
+  } catch (err) {
+    console.error('[mailchimp] unexpected error:', err);
+  }
+}
 
 // Basic field length cap to keep abuse manageable.
 const MAX = (s, n) => (typeof s === 'string' ? s.slice(0, n) : '');
@@ -99,6 +146,9 @@ export default async function handler(req, res) {
       console.error('[resend] error:', result.error);
       return res.status(502).json({ error: 'Email service rejected the request.' });
     }
+
+    // Subscribe to Mailchimp (fire-and-forget — never blocks the response).
+    subscribeToMailchimp({ email, name, role, org });
 
     // Send confirmation email to the submitter.
     await resend.emails.send({
