@@ -1,0 +1,17 @@
+{
+  "name": "meet-cmgt-landing",
+  "version": "1.0.0",
+  "private": true,
+  "description": "CMGT awareness landing page (postcard campaign) — static HTML + Resend serverless handler.",
+  "type": "module",
+  "scripts": {
+    "dev": "vercel dev",
+    "deploy": "vercel --prod"
+  },
+  "dependencies": {
+    "resend": "^4.0.0"
+  },
+  "engines": {
+    "node": ">=18"
+  }
+}
