@@ -75,6 +75,9 @@ async function addToPipedrive({ email, name, phone, role, org, notes, source }) 
   const lastName = rest.join(' ');
 
   try {
+    // 0. Upsert Organization first so we can attach it to both Person and Deal.
+    const orgId = org ? await upsertOrganization(base, qs, org) : undefined;
+
     // 1. Upsert Person — search for existing contact by email first.
     let personId;
     const searchRes = await fetch(
@@ -94,7 +97,7 @@ async function addToPipedrive({ email, name, phone, role, org, notes, source }) 
           name: `${firstName}${lastName ? ' ' + lastName : ''}`,
           email: [{ value: email, primary: true }],
           ...(phone ? { phone: [{ value: phone, primary: true }] } : {}),
-          ...(org   ? { org_id: await upsertOrganization(base, qs, org) } : {}),
+          ...(orgId  ? { org_id: orgId } : {}),
         }),
       });
       const personData = await personRes.json();
@@ -105,7 +108,7 @@ async function addToPipedrive({ email, name, phone, role, org, notes, source }) 
       }
     }
 
-    // 2. Create a Deal linked to the Person.
+    // 2. Create a Deal linked to the Person and Organization.
     const dealTitle = `${name}${org ? ` — ${org}` : ''} (meet-cmgt)`;
     const dealRes = await fetch(`${base}/deals?${qs}`, {
       method: 'POST',
@@ -113,6 +116,7 @@ async function addToPipedrive({ email, name, phone, role, org, notes, source }) 
       body: JSON.stringify({
         title: dealTitle,
         person_id: personId,
+        ...(orgId ? { org_id: orgId } : {}),
         ...(process.env.PIPEDRIVE_PIPELINE_ID
           ? { pipeline_id: Number(process.env.PIPEDRIVE_PIPELINE_ID) }
           : {}),
