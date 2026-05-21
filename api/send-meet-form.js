@@ -265,8 +265,8 @@ export default async function handler(req, res) {
     // Subscribe to Mailchimp (fire-and-forget — never blocks the response).
     subscribeToMailchimp({ email, name, role, org });
 
-    // Push to Pipedrive — create Person + Deal (fire-and-forget).
-    addToPipedrive({ email, name, phone, role, org, notes, source });
+    // Push to Pipedrive — awaited so Vercel doesn't terminate it early.
+    await addToPipedrive({ email, name, phone, role, org, notes, source });
 
     // Send confirmation email to the submitter.
     await resend.emails.send({
