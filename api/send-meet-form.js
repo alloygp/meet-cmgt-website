@@ -5,6 +5,11 @@
 //   RESEND_API_KEY      — your Resend API key (re_...)
 //   LEADS_TO_EMAIL      — where to deliver leads, e.g. "hello@cmgt.org"
 //   LEADS_FROM_EMAIL    — verified sender on Resend, e.g. "CMGT Landing <hello@cmgt.org>"
+//
+// Optional — Pipedrive (Person + Deal):
+//   PIPEDRIVE_API_TOKEN — your Pipedrive personal API token
+//   PIPEDRIVE_PIPELINE_ID — pipeline ID for new deals (defaults to 1)
+//   PIPEDRIVE_STAGE_ID    — stage ID for new deals (defaults to pipeline's first stage)
 
 import { Resend } from 'resend';
 import crypto from 'crypto';
@@ -54,6 +59,116 @@ async function subscribeToMailchimp({ email, name, role, org }) {
     }
   } catch (err) {
     console.error('[mailchimp] unexpected error:', err);
+  }
+}
+
+// Creates a Person + Deal in Pipedrive. Silently logs on failure so a
+// Pipedrive hiccup never breaks the form submission for the user.
+async function addToPipedrive({ email, name, phone, role, org, notes, source }) {
+  const apiToken = process.env.PIPEDRIVE_API_TOKEN;
+  if (!apiToken) return;
+
+  const base = `https://api.pipedrive.com/v1`;
+  const qs   = `api_token=${apiToken}`;
+
+  const [firstName, ...rest] = (name || '').trim().split(' ');
+  const lastName = rest.join(' ');
+
+  try {
+    // 1. Upsert Person — search for existing contact by email first.
+    let personId;
+    const searchRes = await fetch(
+      `${base}/persons/search?term=${encodeURIComponent(email)}&fields=email&exact_match=true&${qs}`,
+    );
+    if (searchRes.ok) {
+      const searchData = await searchRes.json();
+      personId = searchData?.data?.items?.[0]?.item?.id;
+    }
+
+    if (!personId) {
+      // Create a new Person.
+      const personRes = await fetch(`${base}/persons?${qs}`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          name: `${firstName}${lastName ? ' ' + lastName : ''}`,
+          email: [{ value: email, primary: true }],
+          ...(phone ? { phone: [{ value: phone, primary: true }] } : {}),
+          ...(org   ? { org_id: await upsertOrganization(base, qs, org) } : {}),
+        }),
+      });
+      const personData = await personRes.json();
+      personId = personData?.data?.id;
+      if (!personRes.ok || !personId) {
+        console.error('[pipedrive] create person error:', personData?.error);
+        return;
+      }
+    }
+
+    // 2. Create a Deal linked to the Person.
+    const dealTitle = `${name}${org ? ` — ${org}` : ''} (meet-cmgt)`;
+    const dealRes = await fetch(`${base}/deals?${qs}`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        title: dealTitle,
+        person_id: personId,
+        ...(process.env.PIPEDRIVE_PIPELINE_ID
+          ? { pipeline_id: Number(process.env.PIPEDRIVE_PIPELINE_ID) }
+          : {}),
+        ...(process.env.PIPEDRIVE_STAGE_ID
+          ? { stage_id: Number(process.env.PIPEDRIVE_STAGE_ID) }
+          : {}),
+        status: 'open',
+        visible_to: 3, // Everyone
+      }),
+    });
+    const dealData = await dealRes.json();
+    const dealId   = dealData?.data?.id;
+    if (!dealRes.ok || !dealId) {
+      console.error('[pipedrive] create deal error:', dealData?.error);
+      return;
+    }
+
+    // 3. Add a note to the Deal with form context.
+    const noteLines = [
+      `Source: ${source}`,
+      role  ? `Role: ${role}`            : null,
+      notes ? `\nNotes:\n${notes}`       : null,
+    ].filter(Boolean).join('\n');
+
+    if (noteLines) {
+      await fetch(`${base}/notes?${qs}`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ content: noteLines, deal_id: dealId }),
+      });
+    }
+  } catch (err) {
+    console.error('[pipedrive] unexpected error:', err);
+  }
+}
+
+// Finds or creates an Organization by name and returns its ID.
+async function upsertOrganization(base, qs, orgName) {
+  try {
+    const searchRes = await fetch(
+      `${base}/organizations/search?term=${encodeURIComponent(orgName)}&exact_match=true&${qs}`,
+    );
+    if (searchRes.ok) {
+      const data = await searchRes.json();
+      const existing = data?.data?.items?.[0]?.item?.id;
+      if (existing) return existing;
+    }
+    const createRes = await fetch(`${base}/organizations?${qs}`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ name: orgName }),
+    });
+    const created = await createRes.json();
+    return created?.data?.id || undefined;
+  } catch {
+    return undefined;
   }
 }
 
@@ -149,6 +264,9 @@ export default async function handler(req, res) {
 
     // Subscribe to Mailchimp (fire-and-forget — never blocks the response).
     subscribeToMailchimp({ email, name, role, org });
+
+    // Push to Pipedrive — create Person + Deal (fire-and-forget).
+    addToPipedrive({ email, name, phone, role, org, notes, source });
 
     // Send confirmation email to the submitter.
     await resend.emails.send({
