@@ -105,7 +105,7 @@ Most things live in `index.html`:
 | Headline / body copy             | `index.html` — search for `meet-display`, `meet-lede`|
 | The three pillars                | `index.html` — section `pillars`                     |
 | Testimonial quote / stats        | `index.html` — section `proof`                       |
-| Phone number / email             | `index.html` — search `(504) 555-1234` and `hello@cmgt.org` |
+| Phone number / email             | `index.html` — search `(225) 425-5622` and `hello@cmgt.org` |
 | Form fields                      | `index.html` — `<form id="meet-form">`               |
 | Email layout sent to you         | `api/send-meet-form.js` — the `html` template        |
 | Colors, type scale, spacing      | `assets/styles.css`                                  |
