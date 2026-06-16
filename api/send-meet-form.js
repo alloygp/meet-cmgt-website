@@ -289,7 +289,7 @@ export default async function handler(req, res) {
           <p style="margin:0 0 24px;font-size:15px;line-height:1.6;color:#333;">
             No pitch, no pressure — promise. In the meantime, if you have any questions
             you can reply directly to this email or call us at
-            <a href="tel:2255032648" style="color:#1E1E77;">(225) 503-2648</a>.
+            <a href="tel:2254255622" style="color:#1E1E77;">(225) 425-5622</a>.
           </p>
           <div style="border-top:1px solid #eee;padding-top:20px;margin-top:8px;">
             <p style="margin:0;font-size:13px;color:#999;">
@@ -304,7 +304,7 @@ export default async function handler(req, res) {
         ``,
         `Hi ${name.split(' ')[0]}, we got your message and one of our Community Association Managers will reach out within one business day.`,
         ``,
-        `No pitch, no pressure — promise. If you have any questions, reply to this email or call us at (504) 555-1234.`,
+        `No pitch, no pressure — promise. If you have any questions, reply to this email or call us at (225) 425-5622.`,
         ``,
         `CMGT · cmgt.org · Commit. Communicate. Care.`,
       ].join('\n'),
