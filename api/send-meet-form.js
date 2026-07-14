@@ -7,7 +7,9 @@
 //   LEADS_FROM_EMAIL    — verified sender on Resend, e.g. "CMGT Landing <hello@cmgt.org>"
 //
 // Optional — Pipedrive (Person + Deal):
-//   PIPEDRIVE_API_TOKEN — your Pipedrive personal API token
+//   PIPEDRIVE_API_TOKEN   — your Pipedrive personal API token
+//   PIPEDRIVE_OWNER_ID    — Pipedrive user ID to own new leads (Person/Deal/Org).
+//                           Without it, records default to the token owner.
 //   PIPEDRIVE_PIPELINE_ID — pipeline ID for new deals (defaults to 1)
 //   PIPEDRIVE_STAGE_ID    — stage ID for new deals (defaults to pipeline's first stage)
 
@@ -71,12 +73,18 @@ async function addToPipedrive({ email, name, phone, role, org, notes, source }) 
   const base = `https://api.pipedrive.com/v1`;
   const qs   = `api_token=${apiToken}`;
 
+  // Pipedrive user who should own these leads. Without this, records default to
+  // the owner of PIPEDRIVE_API_TOKEN, which routes leads to the wrong person.
+  const ownerId = process.env.PIPEDRIVE_OWNER_ID
+    ? Number(process.env.PIPEDRIVE_OWNER_ID)
+    : undefined;
+
   const [firstName, ...rest] = (name || '').trim().split(' ');
   const lastName = rest.join(' ');
 
   try {
     // 0. Upsert Organization first so we can attach it to both Person and Deal.
-    const orgId = org ? await upsertOrganization(base, qs, org) : undefined;
+    const orgId = org ? await upsertOrganization(base, qs, org, ownerId) : undefined;
 
     // 1. Upsert Person — search for existing contact by email first.
     let personId;
@@ -98,6 +106,7 @@ async function addToPipedrive({ email, name, phone, role, org, notes, source }) 
           email: [{ value: email, primary: true }],
           ...(phone ? { phone: [{ value: phone, primary: true }] } : {}),
           ...(orgId  ? { org_id: orgId } : {}),
+          ...(ownerId ? { owner_id: ownerId } : {}),
         }),
       });
       const personData = await personRes.json();
@@ -117,6 +126,7 @@ async function addToPipedrive({ email, name, phone, role, org, notes, source }) 
         title: dealTitle,
         person_id: personId,
         ...(orgId ? { org_id: orgId } : {}),
+        ...(ownerId ? { user_id: ownerId } : {}),
         ...(process.env.PIPEDRIVE_PIPELINE_ID
           ? { pipeline_id: Number(process.env.PIPEDRIVE_PIPELINE_ID) }
           : {}),
@@ -154,7 +164,7 @@ async function addToPipedrive({ email, name, phone, role, org, notes, source }) 
 }
 
 // Finds or creates an Organization by name and returns its ID.
-async function upsertOrganization(base, qs, orgName) {
+async function upsertOrganization(base, qs, orgName, ownerId) {
   try {
     const searchRes = await fetch(
       `${base}/organizations/search?term=${encodeURIComponent(orgName)}&exact_match=true&${qs}`,
@@ -167,7 +177,10 @@ async function upsertOrganization(base, qs, orgName) {
     const createRes = await fetch(`${base}/organizations?${qs}`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ name: orgName }),
+      body: JSON.stringify({
+        name: orgName,
+        ...(ownerId ? { owner_id: ownerId } : {}),
+      }),
     });
     const created = await createRes.json();
     return created?.data?.id || undefined;
