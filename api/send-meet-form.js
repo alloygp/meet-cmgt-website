@@ -3,7 +3,8 @@
 //
 // Env vars required (set in Vercel dashboard → Settings → Environment Variables):
 //   RESEND_API_KEY      — your Resend API key (re_...)
-//   LEADS_TO_EMAIL      — where to deliver leads, e.g. "hello@cmgt.org"
+//   LEADS_TO_EMAIL      — where to deliver leads. Single address or a
+//                         comma-separated list, e.g. "hello@cmgt.org,jharman@cmgt.org"
 //   LEADS_FROM_EMAIL    — verified sender on Resend, e.g. "CMGT Landing <hello@cmgt.org>"
 //
 // Optional — Pipedrive (Person + Deal):
@@ -236,10 +237,17 @@ export default async function handler(req, res) {
     return res.status(400).json({ error: 'Please provide a valid email.' });
   }
 
+  // Lead recipients — LEADS_TO_EMAIL may be a single address or a
+  // comma-separated list (e.g. "hello@cmgt.org,jharman@cmgt.org").
+  const leadsTo = (process.env.LEADS_TO_EMAIL || 'hello@cmgt.org')
+    .split(',')
+    .map((s) => s.trim())
+    .filter(Boolean);
+
   try {
     const result = await resend.emails.send({
       from: process.env.LEADS_FROM_EMAIL || 'CMGT Landing <hello@cmgt.org>',
-      to:   [process.env.LEADS_TO_EMAIL || 'hello@cmgt.org'],
+      to:   leadsTo,
       replyTo: email,
       subject: `Meet CMGT lead — ${name}${org ? ` (${org})` : ''}`,
       html: `
@@ -289,7 +297,7 @@ export default async function handler(req, res) {
     await resend.emails.send({
       from: process.env.LEADS_FROM_EMAIL || 'CMGT <notifications@cmgt.org>',
       to:   [email],
-      replyTo: process.env.LEADS_TO_EMAIL || 'contact@cmgt.org',
+      replyTo: leadsTo[0] || 'hello@cmgt.org',
       subject: `We got your message, ${name.split(' ')[0]} — talk soon.`,
       html: `
         <div style="font-family:-apple-system,BlinkMacSystemFont,sans-serif;color:#1E1E77;max-width:560px;">
