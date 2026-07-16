@@ -5,7 +5,8 @@
 //   RESEND_API_KEY      — your Resend API key (re_...)
 //   LEADS_TO_EMAIL      — where to deliver leads. Single address or a
 //                         comma-separated list, e.g. "hello@cmgt.org,jharman@cmgt.org"
-//   LEADS_FROM_EMAIL    — verified sender on Resend, e.g. "CMGT Landing <hello@cmgt.org>"
+//   LEADS_FROM_EMAIL    — verified Resend sender. Use the meet.cmgt.org
+//                         send subdomain, e.g. "CMGT <notifications@meet.cmgt.org>"
 //
 // Optional — Pipedrive (Person + Deal):
 //   PIPEDRIVE_API_TOKEN   — your Pipedrive personal API token
@@ -246,7 +247,7 @@ export default async function handler(req, res) {
 
   try {
     const result = await resend.emails.send({
-      from: process.env.LEADS_FROM_EMAIL || 'CMGT Landing <hello@cmgt.org>',
+      from: process.env.LEADS_FROM_EMAIL || 'CMGT <notifications@meet.cmgt.org>',
       to:   leadsTo,
       replyTo: email,
       subject: `Meet CMGT lead — ${name}${org ? ` (${org})` : ''}`,
@@ -295,7 +296,7 @@ export default async function handler(req, res) {
 
     // Send confirmation email to the submitter.
     await resend.emails.send({
-      from: process.env.LEADS_FROM_EMAIL || 'CMGT <notifications@cmgt.org>',
+      from: process.env.LEADS_FROM_EMAIL || 'CMGT <notifications@meet.cmgt.org>',
       to:   [email],
       replyTo: leadsTo[0] || 'hello@cmgt.org',
       subject: `We got your message, ${name.split(' ')[0]} — talk soon.`,

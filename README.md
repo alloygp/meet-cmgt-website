@@ -65,8 +65,8 @@ In the Vercel dashboard → **Settings → Environment Variables**, add:
 | Key                | Value                                    |
 | ------------------ | ---------------------------------------- |
 | `RESEND_API_KEY`   | Your Resend key (`re_…`) from https://resend.com/api-keys |
-| `LEADS_TO_EMAIL`   | Where leads should arrive, e.g. `hello@cmgt.org` |
-| `LEADS_FROM_EMAIL` | Verified sender, e.g. `CMGT Landing <hello@cmgt.org>` |
+| `LEADS_TO_EMAIL`   | Where leads should arrive (comma-separated OK), e.g. `hello@cmgt.org,jharman@cmgt.org` |
+| `LEADS_FROM_EMAIL` | Verified Resend sender on the send subdomain, e.g. `CMGT <notifications@meet.cmgt.org>` |
 
 Then redeploy (Vercel → Deployments → ⋯ → Redeploy) so the function picks up the new vars.
 
